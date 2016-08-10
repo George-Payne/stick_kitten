@@ -27,14 +27,16 @@
                 if(~msg.indexOf('Running application')){
                   console.clear();
                   console.log(msg);
-                }else if(~msg.indexOf('%c')){
-                  eval('console.log(' + msg + ');')
                 }else if (~msg.indexOf('action @')) {
                   console.groupCollapsed(colorifyRedux(msg), 'color: blue;');
                 }else if (~msg.indexOf('log end')) {
                   console.groupEnd();
                 }else{
-                  console.log(msg);
+                  try {
+                    eval('console.log(' + msg + ')');
+                  } catch (e) {
+                    console.log(msg);
+                  }
                 }
               }
             }
