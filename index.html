@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+    <head>
+        <script src='/socket.io/socket.io.js'></script>
+        <script>
+            var socket = io();
+
+            socket.on('priors', (data) => {
+              data.forEach(m => log(m));
+            });
+            socket.on('log', (data) => {
+              log(data)
+            });
+            socket.on('err', (data) => {
+              console.error(data);
+            });
+            socket.on('error', console.error.bind(console));
+            socket.on('message', console.log.bind(console));
+
+            function log(message) {
+              let msg = message.message;
+              if(message.priority === 5){
+                console.warn(msg);
+              }else if (message.priority === 6) {
+                console.error(msg);
+              }else{
+                if(~msg.indexOf('Running application')){
+                  console.clear();
+                  console.log(msg);
+                }else if(~msg.indexOf('%c')){
+                  eval('console.log(' + msg + ');')
+                }else if (~msg.indexOf('action @')) {
+                  console.groupCollapsed(colorifyRedux(msg), 'color: blue;');
+                }else if (~msg.indexOf('log end')) {
+                  console.groupEnd();
+                }else{
+                  console.log(msg);
+                }
+              }
+            }
+
+            function colorifyRedux(str){
+              str = str.trim();
+              let i = str.lastIndexOf(" ");
+              return str.substr(0, i) +  "%c" + str.substr(i - str.length);
+            }
+        </script>
+    </head>
+    <body>
+      <pre>
+   A_A
+  (-.-)   - Hello!
+   |-|
+  /   \
+ |     |  __
+ |  || | |  \___
+ \_||_/_/
+      </pre>
+    </body>
+</html>
