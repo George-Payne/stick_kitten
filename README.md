@@ -1,6 +1,6 @@
 # Stick Kitten
 ###### Logcat... get it...?
-React native console without running debug js.
+React native console (for android) without running "debug js remotely".
 
 ~~~~
 	
