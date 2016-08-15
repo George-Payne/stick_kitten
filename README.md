@@ -1,6 +1,7 @@
 # Stick Kitten
 ###### Logcat... get it...?
 React native console (for android) without running "debug js remotely".
+Will also connect to devices automatically, and reverse ports.
 
 ~~~~
 	
