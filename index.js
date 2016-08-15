@@ -2,6 +2,7 @@
 
 const Promise = require('bluebird'),
       adb = require('adbkit'),
+      exec = require('child_process').exec,
       client = adb.createClient(),
       http = require('http'),
       fs = require('fs'),
@@ -31,43 +32,69 @@ const port = process.argv[2] || 3000;
 
   app.listen(port);
 
-  consoleCat("Stick Kitten running on localhost:" + port, true)
+  consoleCat("Stick Kitten running on localhost:" + port, true);
 
+  // client.listDevices()
+  //   .then((devices) => {
+  //     devices.forEach((device) => {
+  //       attachToDevice(device)
+  //     })
+  //   }).catch((err) => {
+  //     console.error(err)
+  //   });
 
-  client.listDevices()
-    .then((devices) => {
-      devices.forEach((device) => {
-        consoleCat("Device " + device.id + " connected");
-        client.openLogcat(device.id)
-          .then((log) => {
-            procs.push(log);
-
-            log.on('entry', (entry) => {
-              if(entry.tag === "ReactNativeJS"){
-                logs.push(entry);
-                io.emit("log", entry);
-
-              }
-
-            });
-
-            log.on('error', (entry) => {
-              if(entry.tag === "ReactNativeJS"){
-                io.emit("err", entry);
-              }
-            });
-
-          })
-          .catch((err) => {
-            console.error(err)
-          })
+  client.trackDevices()
+    .then((tracker) => {
+      tracker.on('add', (device) => {
+        attachToDevice(device)
       })
+      tracker.on('remove', (device) => {
+        consoleCat("Device " + device.id + " was unplugged");
+      })
+      tracker.on('end', () => {
+        consoleCat('Tracking stopped')
+      })
+    })
+    .catch((err) => {
+      console.error('Something went wrong:', err.stack)
     });
 
   process.on('exit', () => {
     procs.forEach(p => p.kill());
     io.close();
   });
+
+
+function attachToDevice(device){
+  exec("adb reverse tcp:8081 tcp:8081", (error, stdout, stderr) => {
+    if(error){
+      console.error('Failed to reverse tcp', stderr);
+    }else{
+      consoleCat("Device " + device.id + " connected");
+      client.openLogcat(device.id)
+        .then((log) => {
+          procs.push(log);
+
+          log.on('entry', (entry) => {
+            if(entry.tag === "ReactNativeJS"){
+              logs.push(entry);
+              io.emit("log", entry);
+
+            }
+          });
+
+          log.on('error', (entry) => {
+            if(entry.tag === "ReactNativeJS"){
+              io.emit("err", entry);
+            }
+          });
+        });
+    }
+  })
+
+
+}
+
 
 function consoleCat(msg, full){
   const cat = [
