@@ -46,7 +46,35 @@
               let i = str.lastIndexOf(" ");
               return str.substr(0, i) +  "%c" + str.substr(i - str.length);
             }
+
+            function ready(fn) {
+              if (document.readyState != 'loading'){
+                fn();
+              } else {
+                document.addEventListener('DOMContentLoaded', fn);
+              }
+            }
+
+            ready(() => {
+              document.querySelector(".clear_data").addEventListener("click", (e) => {
+                e.preventDefault();
+                console.log("clear_data");
+                socket.emit("clear_data");
+              });
+            })
+
         </script>
+        <style>
+          .clear_data{
+            display: block;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 10px;
+          }
+        </style>
     </head>
     <body>
       <pre>
@@ -57,6 +85,17 @@
  |     |  __
  |  || | |  \___
  \_||_/_/
+      </pre>
+
+      <pre class="clear_data">
+                    _._
+                 .-'   `
+               __|__
+              /     \
+              |()_()|
+              \{o o}/
+Clear Data -   =\o/=
+                ^ ^
       </pre>
     </body>
 </html>

@@ -4,6 +4,7 @@ const Promise = require('bluebird'),
       adb = require('adbkit'),
       exec = require('child_process').exec,
       client = adb.createClient(),
+      settings = require("./settings.json"),
       http = require('http'),
       fs = require('fs'),
       index = fs.readFileSync(__dirname + '/index.html');
@@ -26,6 +27,7 @@ const io = require('socket.io').listen(app);
 
       consoleCat("Hello! " + ++connects + " consoles connected.");
       socket.on('disconnect', () => consoleCat("Goodbye! " + --connects + " consoles connected."));
+      socket.on('clear_data', () => clearAppData())
   });
 
 const port = process.argv[2] || 3000;
@@ -64,6 +66,25 @@ const port = process.argv[2] || 3000;
     io.close();
   });
 
+function clearAppData(){
+  exec(`adb shell pm clear ${settings.package}`, (error, stdout, stderr) => {
+    if(error){
+      console.error('Failed to clear data', stderr);
+    }else{
+      openApp();
+    }
+  });
+}
+
+function openApp(){
+  exec(`adb shell am start -n ${settings.package}/${settings.package}.MainActivity`, (error, stdout, stderr) => {
+    if(error){
+      console.error('Failed to clear data', stderr);
+    }else{
+      consoleRat("Cleared data from " + settings.package);
+    }
+  });
+}
 
 function attachToDevice(device){
   exec("adb reverse tcp:8081 tcp:8081", (error, stdout, stderr) => {
@@ -115,4 +136,15 @@ function consoleCat(msg, full){
     console.log(cat[2]);
     console.log(" ");
   }
+}
+
+function consoleRat(msg){
+  const rat = [
+    "  ()_() ",
+    "  {o o} ",
+    "  =\\o/=   - " + msg,
+    "  "
+  ];
+
+  rat.forEach(line => console.log(line));
 }
