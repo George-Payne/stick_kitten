@@ -17,7 +17,7 @@ Will also connect to devices automatically, and reverse ports.
 
 to start:
 
-`npm install && npm run`
+`npm install && npm start`
 
 to run on another port:
 
